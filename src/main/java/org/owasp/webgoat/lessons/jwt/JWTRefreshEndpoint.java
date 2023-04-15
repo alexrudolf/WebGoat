@@ -51,10 +51,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AssignmentHints({
-  "jwt-refresh-hint1",
-  "jwt-refresh-hint2",
-  "jwt-refresh-hint3",
-  "jwt-refresh-hint4"
+    "jwt-refresh-hint1",
+    "jwt-refresh-hint2",
+    "jwt-refresh-hint3",
+    "jwt-refresh-hint4"
 })
 public class JWTRefreshEndpoint extends AssignmentEndpoint {
 
@@ -62,10 +62,7 @@ public class JWTRefreshEndpoint extends AssignmentEndpoint {
   private static final String JWT_PASSWORD = "bm5n3SkxCX4kKRy4";
   private static final List<String> validRefreshTokens = new ArrayList<>();
 
-  @PostMapping(
-      value = "/JWT/refresh/login",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/JWT/refresh/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity follow(@RequestBody(required = false) Map<String, Object> json) {
     if (json == null) {
@@ -82,12 +79,11 @@ public class JWTRefreshEndpoint extends AssignmentEndpoint {
 
   private Map<String, Object> createNewTokens(String user) {
     Map<String, Object> claims = Map.of("admin", "false", "user", user);
-    String token =
-        Jwts.builder()
-            .setIssuedAt(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toDays(10)))
-            .setClaims(claims)
-            .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, JWT_PASSWORD)
-            .compact();
+    String token = Jwts.builder()
+        .setIssuedAt(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toDays(10)))
+        .setClaims(claims)
+        .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, JWT_PASSWORD)
+        .compact();
     Map<String, Object> tokenJson = new HashMap<>();
     String refreshToken = RandomStringUtils.randomAlphabetic(20);
     validRefreshTokens.add(refreshToken);
@@ -104,7 +100,7 @@ public class JWTRefreshEndpoint extends AssignmentEndpoint {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     try {
-      Jwt jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parse(token.replace("Bearer ", ""));
+      Jwt jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parseClaimsJws(token.replace("Bearer ", ""));
       Claims claims = (Claims) jwt.getBody();
       String user = (String) claims.get("user");
       if ("Tom".equals(user)) {
@@ -133,8 +129,7 @@ public class JWTRefreshEndpoint extends AssignmentEndpoint {
     String user;
     String refreshToken;
     try {
-      Jwt<Header, Claims> jwt =
-          Jwts.parser().setSigningKey(JWT_PASSWORD).parse(token.replace("Bearer ", ""));
+      Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(JWT_PASSWORD).parse(token.replace("Bearer ", ""));
       user = (String) jwt.getBody().get("user");
       refreshToken = (String) json.get("refresh_token");
     } catch (ExpiredJwtException e) {
